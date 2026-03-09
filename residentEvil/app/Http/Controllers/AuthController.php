@@ -21,7 +21,7 @@ class AuthController extends Controller
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'password' => Hash::make($request->password),//criptografia 
         ]);
 
         //gera o token do sexo do user(token atual do usuario)
@@ -33,8 +33,27 @@ class AuthController extends Controller
         ], 201);
     }
 
-    public function login() {}
+    public function login(Request $request) {
+        //validação dos dados, só loga se validar os dados
+        $credentials = $request->validate([
+            'email' => 'required|string|email',
+            'password' => 'required',
+        ]);
+        
+        $user = User::where('email', $request->email)->first();
 
-    public function logout() {}
+        if(!$user || !Hash::check($request->password, $user->password)) {
+            return response()->json(['message' => 'Credenciais inválidas'],401);
+        }
+        $token = $user->createToken('token')->plainTextToken;
+        return response()->json(['user'=>$user,'token'=>$token]);
+    }
+
+    public function logout(Request $request) {
+        $request->user()->tokens()->delete();
+        return response()->json(
+            ['message' => 'Logout realizado com sucesso']
+        );
+    }
 }
 ?>
