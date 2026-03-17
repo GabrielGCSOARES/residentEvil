@@ -1,9 +1,10 @@
-import {StatusBar} from "expo-status-bar";
-import {StyleSheet, Text, View} from "react-native";
-import Register from './src/screens/Register';
+import React from 'react';
+import { View, Text } from 'react-native';
 
-export default function App(){
-  return(
-    <Register/>
+export default function App() {
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'white' }}>
+      <Text style={{ fontSize: 24, color: 'red' }}>TESTE - FUNCIONOU!</Text>
+    </View>
   );
 }
