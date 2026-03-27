@@ -9,7 +9,6 @@ use App\Models\User;
 
 class AuthController extends Controller
 {
-    // cadastrar usuário
     public function register(Request $request)
     {
         $request->validate([
@@ -24,17 +23,50 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        //gera o token do sexo do user(token atual do usuario)
-        $token = $user->createToken('token')->plainTextToken;
+        $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'user' => $user,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email
+            ],
             'token' => $token
         ], 201);
     }
 
-    public function login() {}
+    public function login(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required'
+        ]);
 
-    public function logout() {}
+        if (!Auth::attempt($request->only('email', 'password'))) {
+            return response()->json([
+                'message' => 'Credenciais inválidas'
+            ], 401);
+        }
+
+        $user = User::where('email', $request->email)->firstOrFail();
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email
+            ],
+            'token' => $token
+        ], 200);
+    }
+
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json([
+            'message' => 'Logout realizado com sucesso'
+        ], 200);
+    }
 }
-?>

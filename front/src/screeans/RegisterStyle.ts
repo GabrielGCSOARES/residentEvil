@@ -49,20 +49,61 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
 
+  buttonContainer: {
+    position: 'relative',
+    width: '100%',
+    alignItems: 'center',
+    marginTop: 20,
+    justifyContent: 'center',
+    height: 60,
+  },
+
+  // Borda animada giratória (primeira camada)
+  rotatingBorder: {
+    position: 'absolute',
+    width: '100%',
+    height: 52,
+    borderRadius: 10,
+    borderWidth: 3,
+    borderColor: colors.terminalGreen,
+    borderStyle: 'dashed',
+    shadowColor: colors.terminalGreen,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 15,
+    elevation: 15,
+  },
+
+  // Borda animada giratória reversa (segunda camada)
+  rotatingBorderReverse: {
+    position: 'absolute',
+    width: '98%', 
+    height: 50,
+    borderRadius: 9,
+    borderWidth: 2,
+    borderColor: colors.bloodRed,
+    borderStyle: 'solid',
+    shadowColor: colors.bloodRed,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 10,
+    elevation: 12,
+  },
+
   button: {
     backgroundColor: colors.bloodRed,
     padding: 15,
     borderRadius: 8,
-    width: '100%',
+    width: '96%', // Ligeiramente menor para as bordas aparecerem
     alignItems: 'center',
-    marginTop: 20,
-    borderWidth: 2,
-    borderColor: colors.terminalGreen,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
     shadowColor: colors.terminalGreen,
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.5,
+    shadowOpacity: 0.3,
     shadowRadius: 10,
     elevation: 10,
+    zIndex: 3, // Garante que o botão fique acima das bordas
   },
 
   buttonText: {
@@ -71,6 +112,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textTransform: 'uppercase',
     letterSpacing: 2,
+    textShadowColor: colors.terminalGreen,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 5,
   },
 
   scanline: {
@@ -98,10 +142,10 @@ const styles = StyleSheet.create({
   },
 
   umbrellaIcon: {
-    width: 50,
-    height: 50,
+    width: 80,
+    height: 80,
     backgroundColor: colors.bloodRed,
-    borderRadius: 25,
+    borderRadius: 40,
     marginBottom: 20,
     borderWidth: 2,
     borderColor: colors.white,
