@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Animated, Alert, ActivityIndicator } from 'react-native';
 import useAuth from '../service/UserAuth';
-import styles from '../screeans/LoginStyles';
-import LoadingScreen from '../screeans/LoadingScreen';
+import styles from '../screens/LoginStyles';
+import LoadingScreen from '../screens/LoadingScreen';
 
 const residentEvilCharacters = [
     { name: 'Leon S. Kennedy', quote: 'Claire is my love', color: '#3498db' },
@@ -45,17 +45,28 @@ export default function LoginScreen({ navigation }: any) {
     const handleFocus = (animValue: any) => Animated.timing(animValue, { toValue: 1, duration: 300, useNativeDriver: false }).start();
     const handleBlur = (animValue: any) => Animated.timing(animValue, { toValue: 0, duration: 200, useNativeDriver: false }).start();
 
-    const handleLogin = async () => {
-        if (!email || !password) return Alert.alert('Acesso negado', 'Preencha todos os campos corretamente!');
-        setLoading(true);
-        try {
-            const success = await login(email, password);
-            success ? navigation.replace('Home') : Alert.alert('Falha na Missão', 'Credenciais inválidas. Tente novamente!');
-        } catch (err: any) {
-            Alert.alert('Falha no login', err.message || 'Credenciais inválidas. Tente novamente!', [{ text: 'OK', style: 'destructive' }]);
-        } finally { setLoading(false); }
-    };
+const handleLogin = async () => {
+    if (!email || !password) {
+        return Alert.alert('Acesso negado', 'Preencha todos os campos corretamente!');
+    }
 
+    setLoading(true);
+
+    try {
+        await login(email, password);
+
+        navigation.replace('Home');
+
+    } catch (err: any) {
+        Alert.alert(
+            'Falha no login',
+            err.response?.data?.message || err.message || 'Credenciais inválidas. Tente novamente!',
+            [{ text: 'OK', style: 'destructive' }]
+        );
+    } finally {
+        setLoading(false);
+    }
+};
     const currentChar = residentEvilCharacters[currentCharacter];
 
     return (
