@@ -1,15 +1,126 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet } from 'react-native';
 
-export const colors = {
-  bloodRed: '#8b0000',
-  terminalGreen: '#4ade80',
-  industrialBlack: '#1a1a1a',
-  darkGray: '#2a2a2a',
-  placeholderGray: '#666666',
-  white: '#ffffff',
-};
-
-const styles = StyleSheet.create({ 
-
+export default StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#0a0a0a',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  backgroundOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 50,
+  },
+  title: {
+    fontSize: 48,
+    fontWeight: 'bold',
+    color: '#e74c3c',
+    fontFamily: 'Courier New',
+    textShadowColor: '#2c3e50',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 5,
+    letterSpacing: 3,
+    marginBottom: 10,
+  },
+  subtitle: {
+    fontSize: 12,
+    color: '#7f8c8d',
+    fontFamily: 'monospace',
+    letterSpacing: 2,
+  },
+  divider: {
+    width: 60,
+    height: 2,
+    backgroundColor: '#e74c3c',
+    marginTop: 15,
+  },
+  formContainer: {
+    backgroundColor: 'rgba(20, 20, 20, 0.95)',
+    borderRadius: 8,
+    borderLeftWidth: 4,
+    borderLeftColor: '#e74c3c',
+    borderRightWidth: 1,
+    borderRightColor: 'rgba(255,255,255,0.1)',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.1)',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.1)',
+    padding: 20,
+    marginBottom: 20,
+  },
+  input: {
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderWidth: 1,
+    borderColor: 'rgba(231, 76, 60, 0.3)',
+    borderRadius: 4,
+    padding: 12,
+    marginBottom: 15,
+    color: '#ecf0f1',
+    fontSize: 16,
+    fontFamily: 'monospace',
+  },
+  inputFocused: {
+    borderColor: '#e74c3c',
+    borderWidth: 2,
+  },
+  buttonContainer: {
+    marginTop: 10,
+    borderRadius: 4,
+    overflow: 'hidden',
+    backgroundColor: '#e74c3c',
+  },
+  button: {
+    backgroundColor: '#e74c3c',
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    letterSpacing: 1,
+    fontFamily: 'monospace',
+  },
+  secondaryButton: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#e74c3c',
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderRadius: 4,
+  },
+  secondaryButtonText: {
+    color: '#e74c3c',
+    fontSize: 14,
+    fontWeight: 'bold',
+    letterSpacing: 1,
+    fontFamily: 'monospace',
+  },
+  warningText: {
+    color: '#e74c3c',
+    fontSize: 12,
+    textAlign: 'center',
+    marginTop: 20,
+    fontFamily: 'monospace',
+  },
+  characterBar: {
+    height: 2,
+    backgroundColor: 'rgba(231, 76, 60, 0.3)',
+    marginTop: 20,
+    borderRadius: 1,
+    overflow: 'hidden',
+  },
+  characterFill: {
+    height: '100%',
+    width: '30%',
+    backgroundColor: '#e74c3c',
+  },
 });
-export default styles;
