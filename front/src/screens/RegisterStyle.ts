@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bloodRed,
     padding: 15,
     borderRadius: 8,
-    width: '96%', // Ligeiramente menor para as bordas aparecerem
+    width: '96%', 
     alignItems: 'center',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.3)',
@@ -103,7 +103,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 10,
     elevation: 10,
-    zIndex: 3, // Garante que o botão fique acima das bordas
+    zIndex: 3, 
+    margin: 4
   },
 
   buttonText: {
@@ -111,6 +112,17 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     textTransform: 'uppercase',
+    letterSpacing: 2,
+    textShadowColor: colors.terminalGreen,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 5,
+  },
+
+  buttonText2: {
+    color: colors.white,
+    fontSize: 15,
+    fontWeight: 'bold',
+    textTransform: 'lowercase',
     letterSpacing: 2,
     textShadowColor: colors.terminalGreen,
     textShadowOffset: { width: 0, height: 0 },

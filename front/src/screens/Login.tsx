@@ -52,8 +52,10 @@ const handleLogin = async () => {
 
     setLoading(true);
 
+    const minimumSplashTime = new Promise(resolve => setTimeout(resolve, 5000));
+
     try {
-        await login(email, password);
+        await Promise.all([login(email, password), minimumSplashTime]); 
 
         navigation.replace('Home');
 

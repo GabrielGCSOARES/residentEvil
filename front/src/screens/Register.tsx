@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, Animated, Easing, Alert } from 'react-native';
 import styles, { colors } from './RegisterStyle';
 import useAuth from '../service/UserAuth';
+import { useNavigation } from '@react-navigation/native';
 
 export default function Register() {
   const { register } = useAuth();
@@ -22,6 +23,12 @@ export default function Register() {
     else Alert.alert("Erro no registro", "Verifique suas informações e tente novamente.");
   };
 
+  const navigation = useNavigation();
+
+  const irParaRegistro = () => {
+    navigation.navigate('Login'); // nome da tela
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.scanline} />
@@ -36,6 +43,10 @@ export default function Register() {
 
         <TouchableOpacity style={styles.button} onPress={registrar} activeOpacity={0.8}>
           <Text style={styles.buttonText}>INICIAR PROTOCOLO</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.button} onPress={irParaRegistro} activeOpacity={0.8}>
+          <Text style={styles.buttonText2}>JÁ POSSUI CADASTRO? FAÇA LOGIN</Text>
         </TouchableOpacity>
       </View>
     </View>
