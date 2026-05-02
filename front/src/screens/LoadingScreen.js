@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, Animated, StyleSheet, Easing, Dimensions, ActivityIndicator} from 'react-native';
 
-
 const { width, height } = Dimensions.get('window');
 
 const loadingMessages = [

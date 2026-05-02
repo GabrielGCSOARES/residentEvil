@@ -1,433 +1,291 @@
-// src/screens/HomeStyle.tsx
-import { StyleSheet, Dimensions } from 'react-native';
+import { Dimensions, StyleSheet } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
 
+// Largura do painel esquerdo (colorido com o personagem)
+export const DIAGONAL_WIDTH = width * 0.56;
+
 export default StyleSheet.create({
-    container: {
+
+    // ─── Layout raiz ─────────────────────────────────────────────────────────
+    root: {
         flex: 1,
-        backgroundColor: '#000000',
+        backgroundColor: '#f0ece6',
+        overflow: 'hidden',
     },
-    backgroundOverlay: {
+
+    // ─── Painel Esquerdo (cor dinâmica + personagem) ──────────────────────────
+    leftPanel: {
         position: 'absolute',
         top: 0,
         left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: '#0a0505',
+        width: DIAGONAL_WIDTH + 32,
+        height: height,
+        overflow: 'hidden',
     },
-    scanline: {
+
+    // Marca d'água do jogo no fundo
+     watermarkGame: {
         position: 'absolute',
-        width: width,
-        height: 3,
-        backgroundColor: 'rgba(139, 0, 0, 0.15)',
-        zIndex: 1,
+        bottom: 200, // Aumentei o espaço conforme sua solicitação anterior
+        left: 12,
+        fontSize: 34,
+        fontWeight: 'bold',
+        letterSpacing: 2,
+        lineHeight: 38,
+        textShadowColor: 'rgba(0,0,0,0.3)', // Sombra profissional
+        textShadowOffset: { width: 1, height: 1 },
+        textShadowRadius: 3,
     },
-    glitchOverlay: {
+
+    // Badge "RE 1" no canto superior esquerdo
+    gameBadge: {
         position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(255, 0, 0, 0.05)',
-        zIndex: 2,
-        pointerEvents: 'none',
+        top: 54,
+        left: 16,
+        borderWidth: 1,
+        borderRadius: 6,
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        zIndex: 10,
     },
-    scrollView: {
-        flex: 1,
-        padding: 20,
-    },
-    header: {
-        marginBottom: 20,
-        borderBottomWidth: 1,
-        borderBottomColor: '#8b0000',
-        paddingBottom: 10,
-    },
-    terminalHeader: {
-        fontFamily: 'Courier New',
-        fontSize: 14,
-        color: '#8b0000',
-        textAlign: 'center',
+    gameBadgeText: {
+        fontSize: 10,
+        fontWeight: '800',
         letterSpacing: 2,
     },
-    quarantineWarning: {
-        fontFamily: 'Courier New',
-        fontSize: 12,
-        color: '#ff0000',
-        textAlign: 'center',
-        marginTop: 5,
+
+    // Container da imagem do personagem
+    charWrapper: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        alignItems: 'center',
+    },
+    charImage: {
+        width: DIAGONAL_WIDTH + 24,
+        height: height * 0.86,
+        resizeMode: 'contain',
+    },
+
+    // ─── Setas de navegação lateral (sobre o painel esquerdo) ────────────────
+    arrowLeft: {
+        position: 'absolute',
+        left: 10,
+        top: '50%',
+        marginTop: -22,
+        zIndex: 20,
+        width: 36,
+        height: 44,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.3)', 
+        borderRadius: 22,
+    },
+    arrowRight: {
+        position: 'absolute',
+        left: DIAGONAL_WIDTH - 10,
+        top: '50%',
+        marginTop: -22,
+        zIndex: 20,
+        width: 36,
+        height: 44,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.3)', 
+        borderRadius: 22,
+    },
+    arrowText: {
+        fontSize: 28,
         fontWeight: 'bold',
+        // A cor será definida dinamicamente no componente
     },
-    systemStatus: {
-        backgroundColor: 'rgba(139, 0, 0, 0.1)',
-        padding: 12,
-        borderRadius: 4,
-        marginBottom: 15,
-        borderLeftWidth: 3,
-        borderLeftColor: '#8b0000',
+
+    // ─── Overlay diagonal que divide os dois painéis ──────────────────────────
+    diagonalOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: DIAGONAL_WIDTH - 4,
+        width: 46,
+        height: height,
+        backgroundColor: '#f0ece6',
+        transform: [{ skewX: '-8deg' }],
     },
-    systemText: {
-        fontFamily: 'Courier New',
-        fontSize: 11,
-        color: '#8b0000',
-        marginBottom: 3,
+
+    // ─── Painel Direito (claro, informações) ─────────────────────────────────
+    rightPanel: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        width: width - DIAGONAL_WIDTH + 32,
+        height: height,
+        backgroundColor: '#f0ece6',
+        paddingTop: 50,
+        paddingHorizontal: 18,
+        paddingBottom: 28,
     },
-    comLink: {
-        backgroundColor: 'rgba(0, 0, 0, 0.7)',
-        padding: 12,
-        borderRadius: 4,
-        marginBottom: 15,
-        borderWidth: 1,
-        borderColor: '#8b0000',
-    },
-    comLinkTitle: {
-        fontFamily: 'Courier New',
-        fontSize: 12,
-        color: '#8b0000',
-        fontWeight: 'bold',
-        marginBottom: 8,
-    },
-    signalBar: {
-        height: 4,
-        backgroundColor: '#2c2c2c',
-        borderRadius: 2,
-        overflow: 'hidden',
-        marginBottom: 5,
-    },
-    signalFill: {
-        height: '100%',
-        backgroundColor: '#8b0000',
-    },
-    signalText: {
-        fontFamily: 'Courier New',
-        fontSize: 9,
-        color: '#7f8c8d',
-    },
-    terminalWindow: {
-        backgroundColor: '#000000',
-        borderWidth: 1,
-        borderColor: '#8b0000',
-        padding: 12,
-        borderRadius: 4,
-        marginBottom: 20,
-        minHeight: 100,
-    },
-    terminalLine: {
-        fontFamily: 'Courier New',
-        fontSize: 10,
-        color: '#33ff33',
-        marginBottom: 4,
-    },
-    tabBar: {
+
+    // ─── Nav superior (3 abas) ────────────────────────────────────────────────
+    topNav: {
         flexDirection: 'row',
-        backgroundColor: '#1a0000',
-        borderRadius: 4,
-        marginBottom: 20,
-        borderWidth: 1,
-        borderColor: '#8b0000',
+        alignItems: 'center',
+        marginBottom: 24,
     },
-    tabButton: {
+    navItem: {
+        fontSize: 10,
+        color: '#aaa',
+        fontWeight: '600',
+        letterSpacing: 0.4,
+        marginRight: 14,
+        paddingBottom: 3,
+    },
+    navItemActive: {
+        color: '#111',
+        borderBottomWidth: 1.5,
+        borderBottomColor: '#111',
+    },
+
+    // ─── Conteúdo do personagem ───────────────────────────────────────────────
+    charContent: {
         flex: 1,
-        paddingVertical: 12,
-        alignItems: 'center',
+        justifyContent: 'center',
     },
-    activeTab: {
-        backgroundColor: '#8b0000',
+
+    // Nome
+    firstName: {
+        fontSize: 20,
+        fontWeight: '900',
+        color: '#111',
+        letterSpacing: 1,
+        lineHeight: 22,
     },
-    tabText: {
-        fontFamily: 'Courier New',
-        fontSize: 11,
-        color: '#7f8c8d',
-        fontWeight: 'bold',
+    lastName: {
+        fontSize: 26,
+        fontWeight: '900',
+        letterSpacing: 1,
+        lineHeight: 29,
+        marginBottom: 12,
     },
-    activeTabText: {
-        color: '#ffffff',
-    },
-    sectionContainer: {
-        marginBottom: 20,
-    },
-    sectionTitle: {
-        fontFamily: 'Courier New',
-        fontSize: 16,
-        color: '#8b0000',
-        fontWeight: 'bold',
-        marginBottom: 5,
-    },
-    sectionSubtitle: {
-        fontFamily: 'Courier New',
-        fontSize: 10,
-        color: '#7f8c8d',
-        marginBottom: 15,
-    },
-    missionCard: {
-        backgroundColor: '#1a0000',
-        padding: 15,
-        borderRadius: 4,
-        marginBottom: 10,
-        borderLeftWidth: 4,
-        borderLeftColor: '#8b0000',
-    },
-    missionHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 8,
-    },
-    missionTitle: {
-        fontFamily: 'Courier New',
-        fontSize: 14,
-        color: '#ffffff',
-        fontWeight: 'bold',
-    },
-    dangerBadge: {
-        paddingHorizontal: 8,
-        paddingVertical: 2,
+
+    // Divisória colorida dinâmica
+    divider: {
+        width: 34,
+        height: 2.5,
         borderRadius: 2,
-        fontSize: 9,
-        color: '#ffffff',
-        fontWeight: 'bold',
-    },
-    missionDescription: {
-        fontFamily: 'Courier New',
-        fontSize: 11,
-        color: '#bdc3c7',
-        marginBottom: 8,
-    },
-    missionFooter: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-    },
-    missionLocation: {
-        fontFamily: 'Courier New',
-        fontSize: 9,
-        color: '#f39c12',
-    },
-    missionReward: {
-        fontFamily: 'Courier New',
-        fontSize: 9,
-        color: '#2ecc71',
-    },
-    survivorCard: {
-        backgroundColor: '#1a0000',
-        padding: 15,
-        borderRadius: 4,
         marginBottom: 10,
     },
-    survivorHeader: {
+
+    // Role e Status
+    roleText: {
+        fontSize: 8,
+        fontWeight: '800',
+        letterSpacing: 1.8,
+        color: '#888',
+        marginBottom: 8,
+    },
+    statusRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 8,
+        marginBottom: 16,
     },
     statusDot: {
-        width: 8,
-        height: 8,
+        width: 7,
+        height: 7,
         borderRadius: 4,
-        marginRight: 8,
+        marginRight: 6,
     },
-    survivorName: {
-        fontFamily: 'Courier New',
-        fontSize: 14,
-        color: '#ffffff',
-        fontWeight: 'bold',
-        flex: 1,
-    },
-    survivorStatus: {
-        fontFamily: 'Courier New',
-        fontSize: 10,
-    },
-    survivorMessage: {
-        fontFamily: 'Courier New',
-        fontSize: 11,
-        color: '#bdc3c7',
-        fontStyle: 'italic',
-        marginBottom: 8,
-        paddingLeft: 16,
-    },
-    survivorMeta: {
-        fontFamily: 'Courier New',
+    statusText: {
         fontSize: 9,
-        color: '#7f8c8d',
-        marginBottom: 10,
+        fontWeight: '800',
+        letterSpacing: 1.5,
     },
-    commButton: {
-        backgroundColor: '#8b0000',
-        padding: 8,
-        borderRadius: 4,
-        alignItems: 'center',
-    },
-    commButtonText: {
-        fontFamily: 'Courier New',
-        fontSize: 10,
-        color: '#ffffff',
-        fontWeight: 'bold',
-    },
-    fileCard: {
-        backgroundColor: '#1a0000',
-        padding: 15,
-        borderRadius: 4,
-        marginBottom: 10,
-    },
-    fileHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
+
+    // About
+    aboutLabel: {
+        fontSize: 9,
+        fontWeight: '800',
+        letterSpacing: 2,
+        color: '#333',
         marginBottom: 8,
     },
-    fileCode: {
-        fontFamily: 'Courier New',
-        fontSize: 14,
-        color: '#e74c3c',
-        fontWeight: 'bold',
-    },
-    clearanceBadge: {
-        paddingHorizontal: 8,
-        paddingVertical: 2,
-        borderRadius: 2,
-        fontSize: 9,
-        color: '#ffffff',
-        fontWeight: 'bold',
-    },
-    eyesOnly: {
-        backgroundColor: '#8e44ad',
-    },
-    topSecret: {
-        backgroundColor: '#c0392b',
-    },
-    classified: {
-        backgroundColor: '#7f8c8d',
-    },
-    fileSubject: {
-        fontFamily: 'Courier New',
+    aboutText: {
         fontSize: 12,
-        color: '#ffffff',
-        marginBottom: 5,
-    },
-    fileDate: {
-        fontFamily: 'Courier New',
-        fontSize: 9,
-        color: '#7f8c8d',
-    },
-    mapContainer: {
-        backgroundColor: '#1a0000',
-        padding: 15,
-        borderRadius: 4,
-    },
-    mapGrid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'space-between',
-        marginBottom: 15,
-    },
-    mapZone: {
-        width: '30%',
-        backgroundColor: '#000000',
-        padding: 12,
-        borderRadius: 4,
-        alignItems: 'center',
-        marginBottom: 10,
-        borderWidth: 1,
-        borderColor: '#8b0000',
-    },
-    mapZoneName: {
-        fontFamily: 'Courier New',
-        fontSize: 10,
-        color: '#ffffff',
-        marginBottom: 5,
-    },
-    mapZoneThreat: {
-        fontSize: 16,
-    },
-    mapLegend: {
-        fontFamily: 'Courier New',
-        fontSize: 9,
-        color: '#7f8c8d',
-        textAlign: 'center',
-    },
-    threatAlert: {
-        backgroundColor: '#1a0000',
-        padding: 15,
-        borderRadius: 4,
+        lineHeight: 17,
+        color: '#555',
         marginBottom: 20,
-        borderWidth: 2,
-        borderColor: '#ff0000',
     },
-    threatTitle: {
-        fontFamily: 'Courier New',
-        fontSize: 14,
-        color: '#ff0000',
-        fontWeight: 'bold',
-        textAlign: 'center',
-        marginBottom: 10,
+
+    // ─── Botão EXPLORE LORE ───────────────────────────────────────────────────
+    startBtn: {
+        borderRadius: 6,
+        paddingVertical: 12,
+        paddingHorizontal: 18,
+        alignSelf: 'flex-start',
+        marginBottom: 22,
     },
-    threatMessage: {
-        fontFamily: 'Courier New',
-        fontSize: 12,
-        color: '#ffffff',
-        fontStyle: 'italic',
-        textAlign: 'center',
-        marginBottom: 8,
-    },
-    threatMeta: {
-        fontFamily: 'Courier New',
-        fontSize: 9,
-        color: '#7f8c8d',
-        textAlign: 'center',
-        marginBottom: 10,
-    },
-    severityBadge: {
-        alignSelf: 'center',
-        paddingHorizontal: 10,
-        paddingVertical: 3,
-        borderRadius: 2,
-        backgroundColor: '#f39c12',
-    },
-    highSeverity: {
-        backgroundColor: '#ff0000',
-    },
-    severityText: {
-        fontFamily: 'Courier New',
-        fontSize: 9,
-        color: '#ffffff',
-        fontWeight: 'bold',
-    },
-    footer: {
-        backgroundColor: '#0a0000',
-        padding: 12,
-        borderRadius: 4,
-        marginBottom: 15,
-        borderTopWidth: 1,
-        borderTopColor: '#8b0000',
-    },
-    systemBar: {
-        marginBottom: 8,
-    },
-    footerText: {
-        fontFamily: 'Courier New',
-        fontSize: 9,
-        color: '#7f8c8d',
-        marginBottom: 3,
-    },
-    footerWarning: {
-        fontFamily: 'Courier New',
+    startBtnText: {
+        color: '#fff',
         fontSize: 10,
-        color: '#ff0000',
-        textAlign: 'center',
-        marginTop: 8,
-        fontWeight: 'bold',
+        fontWeight: '800',
+        letterSpacing: 1.5,
     },
-    logoutButton: {
-        backgroundColor: '#1a0000',
-        padding: 15,
-        borderRadius: 4,
+
+    // ─── Navegação inferior: setas + dots ────────────────────────────────────
+    bottomNav: {
+        flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 30,
-        borderWidth: 1,
-        borderColor: '#8b0000',
     },
-    logoutText: {
-        fontFamily: 'Courier New',
-        fontSize: 12,
-        color: '#8b0000',
-        fontWeight: 'bold',
+
+    // Seta ‹ e › nos dots
+    dotArrow: {
+        paddingHorizontal: 6,
+        paddingVertical: 4,
+    },
+    dotArrowText: {
+        fontSize: 18,
+        color: '#aaa',
+        fontWeight: '300',
+    },
+
+    // Dots
+    dotsRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginHorizontal: 4,
+    },
+    dotWrapper: {
+        marginRight: 5,
+        padding: 4,
+    },
+    dot: {
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+        backgroundColor: '#ccc',
+    },
+    dotActive: {
+        width: 18,
+        height: 6,
+        borderRadius: 3,
+    },
+
+    // ─── Rodapé da franquia (sobre painel esquerdo) ───────────────────────────
+    franchiseFooter: {
+        position: 'absolute',
+        bottom: 18,
+        left: 16,
+    },
+    franchiseText: {
+        fontSize: 10,
+        fontWeight: '900',
+        letterSpacing: 3,
+        color: 'rgba(255,255,255,0.32)',
+    },
+    franchiseSubText: {
+        fontSize: 7,
+        letterSpacing: 1.4,
+        color: 'rgba(255, 10, 10, 0.18)',
+        marginTop: 2,
     },
 });

@@ -1,408 +1,311 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
-    View,
+    Animated,
+    Image,
     Text,
     TouchableOpacity,
-    Animated,
-    ScrollView,
-    Alert,
-    ActivityIndicator
+    View,
 } from 'react-native';
-import styles from './HomeStyle';
+import styles, { DIAGONAL_WIDTH } from './HomeStyle';
 
-interface Survivor {
+
+type StatusType = 'ALIVE' | 'DEATH' | 'UNKNOWN' | 'INFECTED';
+
+interface Character {
     id: string;
-    name: string;
-    status: 'ALIVE' | 'MISSING' | 'INFECTED' | 'DECEASED';
-    lastSeen: string;
-    message: string;
-    avatarColor: string;
+    firstName: string;
+    lastName: string;
+    game: string;
+    accent: string;        
+    accentLight: string;   
+    about: string;
+    role: string;
+    status: StatusType;
+    image: ReturnType<typeof require>;
 }
 
-interface Mission {
-    id: string;
-    title: string;
-    description: string;
-    reward: string;
-    danger: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-    location: string;
-}
+type NavTab = {
+    label: string;
+    route:'GameSummaries' | 'FullLore' | null;
+};
 
-interface UmbrellaFile {
-    id: string;
-    codeName: string;
-    subject: string;
-    clearance: 'CLASSIFIED' | 'TOP SECRET' | 'EYES ONLY';
-    date: string;
-}
+const PH = { uri: 'https://placehold.co/300x600/transparent/transparent/png' };
+
+const CHARACTERS: Character[] = [
+    {
+        id: 'leon',
+        firstName: 'LEON S.',
+        lastName: 'KENNEDY',
+        game: 'RE 2 / RE 4',
+        accent: '#1a3a5c',
+        accentLight: '#2a6496',
+        about: 'Agente federal e sobrevivente de Raccoon City. Escapou do colapso em 1998 e resgatou a filha do presidente na Espanha contra Las Plagas.',
+        role: 'U.S. GOVERNMENT AGENT / D.S.O',
+        status: 'ALIVE',
+        image: require('../assets/characters/LeonSKeneddy.png'),
+    },
+    {
+        id: 'jill',
+        firstName: 'JILL',
+        lastName: 'VALENTINE',
+        game: 'RE 1 / RE 3 / RE 5',
+        accent: '#2c1654',
+        accentLight: '#6a3fa0',
+        about: 'Membro fundadora dos S.T.A.R.S. Sobreviveu à mansão Spencer, foi caçada pelo Nemesis e quase perdeu a si mesma para Wesker.',
+        role: 'S.T.A.R.S. ALPHA / BSAA / D.S.O',
+        status: 'ALIVE',
+        image: require('../assets/characters/JillValentine.png'),
+    },
+    {
+        id: 'wesker',
+        firstName: 'ALBERT',
+        lastName: 'WESKER',
+        game: 'RE 1 / RE 5',
+        accent: '#0d0d0d',
+        accentLight: '#4a4a4a',
+        about: 'Ex-capitão dos S.T.A.R.S. e agente duplo da Umbrella. Infectado com Progenitor, planejou reescrever a evolução humana antes de ser destruído por Chris.',
+        role: 'UMBRELLA AGENT',
+        status: 'DEATH',
+        image: require('../assets/characters/wesker.png'),
+    },
+    {
+        id: 'claire',
+        firstName: 'CLAIRE',
+        lastName: 'REDFIELD',
+        game: 'RE 2 / RE CV',
+        accent: '#7c1414',
+        accentLight: '#c0392b',
+        about: 'Irmã de Chris Redfield. Sobreviveu ao colapso de Raccoon City, protegeu Sherry Birkin e enfrentou as criações de William Birkin.',
+        role: 'TERRA SAVE / CIVILIAN / D.S.O',
+        status: 'ALIVE',
+        image: require('../assets/characters/Claire.png'),
+    },
+    {
+        id: 'chris',
+        firstName: 'CHRIS',
+        lastName: 'REDFIELD',
+        game: 'RE 1 / RE CV /  RE 5 / RE 7/ RE 8',
+        accent: '#1e3a14',
+        accentLight: '#3d7a28',
+        about: 'Veterano dos S.T.A.R.S. e agente da BSAA. Destruiu Wesker, investigou a Fazenda Baker e enfrentou Mãe Miranda para salvar Rose Winters.',
+        role: 'S.T.A.R.S. ALPHA / BSAA / D.S.O / WOLFES',
+        status: 'ALIVE',
+        image: require('../assets/characters/ChrisRedfield.png'),
+    },
+];
+
+const STATUS_COLORS: Record<StatusType, string> = {
+    ALIVE: '#27ae60',
+    DEATH: '#e74c3c',
+    UNKNOWN: '#f39c12',
+    INFECTED: '#8e44ad',
+};
+
+
+const NAV_TABS: NavTab[] = [
+    { label: 'Infos Games', route: 'GameSummaries' as const },
+    { label: 'Character', route: null },
+    { label: 'Full history', route: 'FullLore' as const },
+];
 
 export default function HomeScreen({ navigation }: any) {
-    const [selectedTab, setSelectedTab] = useState<'missions' | 'survivors' | 'files' | 'map'>('missions');
-    const [terminalLines, setTerminalLines] = useState<string[]>([
-        '> R.P.D. EMERGENCY TERMINAL v.1.3.7',
-        '> SYSTEM BOOT SEQUENCE COMPLETE',
-        '> WELCOME BACK, SURVIVOR',
-        '> LAST KNOWN SAFE ZONE: MAIN HALL',
-        '> LOADING DATABASES...',
-    ]);
-    const [scanlinePosition] = useState(new Animated.Value(0));
-    const [glitchIntensity] = useState(new Animated.Value(0));
-    const [activeThreat, setActiveThreat] = useState({
-        message: "Multiple zombies detected near East Wing. Avoid if possible.",
-        sender: "Officer Johnson",
-        timestamp: "2 MINUTES AGO",
-        severity: "HIGH"
-    });
+    const [charIndex, setCharIndex] = useState(0);
+    const [activeTab, setActiveTab] = useState(1); 
 
-    const [survivors] = useState<Survivor[]>([
-        {
-            id: '1',
-            name: 'Leon S. Kennedy',
-            status: 'ALIVE',
-            lastSeen: 'R.P.D. Main Hall - 45min ago',
-            message: 'I\'m heading to the underground lab. Umbrella must pay for this.',
-            avatarColor: '#3498db'
-        },
-        {
-            id: '2',
-            name: 'Claire Redfield',
-            status: 'ALIVE',
-            lastSeen: 'Orphanage - 2h ago',
-            message: 'Found some survivors. Need extraction point ASAP!',
-            avatarColor: '#e74c3c'
-        },
-        {
-            id: '3',
-            name: 'Jill Valentine',
-            status: 'MISSING',
-            lastSeen: 'Mansion - 6h ago',
-            message: 'Last transmission: "I found something... oh god, it\'s Wesker!"',
-            avatarColor: '#2ecc71'
-        },
-        {
-            id: '4',
-            name: 'Albert Wesker',
-            status: 'INFECTED',
-            lastSeen: 'Underground Lab - Unknown',
-            message: '[TRANSMISSION CORRUPTED] - Betrayal detected',
-            avatarColor: '#9b59b6'
-        }
-    ]);
+    const fadeAnim   = useRef(new Animated.Value(1)).current;
+    const slideAnim  = useRef(new Animated.Value(0)).current;
+    const charXAnim  = useRef(new Animated.Value(0)).current;
+    const floatAnim  = useRef(new Animated.Value(0)).current;
 
-    const [missions] = useState<Mission[]>([
-        {
-            id: '1',
-            title: '🔍 GATHER INTEL',
-            description: 'Search the Chief\'s office for Umbrella classified documents',
-            reward: 'Weapon Upgrade + 500 EXP',
-            danger: 'MEDIUM',
-            location: 'R.P.D. 2nd Floor'
-        },
-        {
-            id: '2',
-            title: '💊 FIND ANTIDOTE',
-            description: 'Locate the T-Virus vaccine in the hospital basement',
-            reward: 'Immunity Boost + 1000 EXP',
-            danger: 'CRITICAL',
-            location: 'Raccoon Hospital'
-        },
-        {
-            id: '3',
-            title: '📻 ACTIVATE RADIO TOWER',
-            description: 'Restore communications to call for military backup',
-            reward: 'Unlock Fast Travel + 750 EXP',
-            danger: 'HIGH',
-            location: 'Clock Tower'
-        },
-        {
-            id: '4',
-            title: '🚪 ESCAPE ROUTE',
-            description: 'Secure the sewer passage to the evacuation point',
-            reward: 'Safe Passage + 300 EXP',
-            danger: 'LOW',
-            location: 'Sewer System'
-        }
-    ]);
-
-    const [umbrellaFiles] = useState<UmbrellaFile[]>([
-        {
-            id: '1',
-            codeName: 'NEMESIS',
-            subject: 'Pursuer Project',
-            clearance: 'EYES ONLY',
-            date: '1998-09-28'
-        },
-        {
-            id: '2',
-            codeName: 'G-VIRUS',
-            subject: 'William Birkin\'s Legacy',
-            clearance: 'TOP SECRET',
-            date: '1998-09-20'
-        },
-        {
-            id: '3',
-            codeName: 'RED QUEEN',
-            subject: 'A.I. Containment System',
-            clearance: 'CLASSIFIED',
-            date: '1998-05-15'
-        }
-    ]);
+    const character = CHARACTERS[charIndex];
+    const total = CHARACTERS.length;
 
     useEffect(() => {
         Animated.loop(
-            Animated.timing(scanlinePosition, {
-                toValue: 1,
-                duration: 4000,
-                useNativeDriver: true
-            })
-        ).start();
-
-        const glitchInterval = setInterval(() => {
             Animated.sequence([
-                Animated.timing(glitchIntensity, { toValue: 1, duration: 50, useNativeDriver: true }),
-                Animated.timing(glitchIntensity, { toValue: 0, duration: 200, useNativeDriver: true })
+                Animated.timing(floatAnim, { toValue: -9,  duration: 2800, useNativeDriver: true }),
+                Animated.timing(floatAnim, { toValue: 0,   duration: 2800, useNativeDriver: true }),
+            ])
+        ).start();
+    },[floatAnim]);
+
+   useEffect
+
+    useEffect(() => {
+        const t = setInterval(() => goTo((charIndex + 1) % total), 4500);
+        return () => clearInterval(t);
+    }, [charIndex, total]);
+
+    const goTo = useCallback((index: number) => {
+        // Saída
+        Animated.parallel([
+            Animated.timing(fadeAnim,  { toValue: 0,  duration: 160, useNativeDriver: true }),
+            Animated.timing(slideAnim, { toValue: 12, duration: 160, useNativeDriver: true }),
+            Animated.timing(charXAnim, { toValue: 48, duration: 180, useNativeDriver: true }),
+        ]).start(() => {
+            setCharIndex(index);
+            slideAnim.setValue(-12);
+            charXAnim.setValue(-48);
+            // Entrada
+            Animated.parallel([
+                Animated.timing(fadeAnim,  { toValue: 1, duration: 300, useNativeDriver: true }),
+                Animated.timing(slideAnim, { toValue: 0, duration: 300, useNativeDriver: true }),
+                Animated.timing(charXAnim, { toValue: 0, duration: 320, useNativeDriver: true }),
             ]).start();
-        }, 5000);
+        });
+    }, [fadeAnim, slideAnim, charXAnim]);
 
-        const messageInterval = setInterval(() => {
-            const emergencyMessages = [
-                '> ⚠️ WARNING: Unknown creature detected in sewers ⚠️',
-                '> 📡 Signal lost with Alpha Team... requesting backup',
-                '> 🧪 Umbrella lab breach confirmed. G-Virus containment failed',
-                '> 💀 Survivor count: 23 remaining in Raccoon City',
-                '> 🔫 Ammo shortage reported in safe zone'
-            ];
-            const randomMsg = emergencyMessages[Math.floor(Math.random() * emergencyMessages.length)];
-            setTerminalLines(prev => [...prev.slice(-4), randomMsg]);
-        }, 8000);
+    // seta para a esquerda
+    const goPrev = () => goTo((charIndex - 1 + total) % total);
 
-        return () => {
-            clearInterval(glitchInterval);
-            clearInterval(messageInterval);
-        };
-    }, []);
+    //seta para a direita
+    const goNext = () => goTo((charIndex + 1) % total);
 
-    const getStatusColor = (status: string) => {
-        switch(status) {
-            case 'ALIVE': return '#2ecc71';
-            case 'MISSING': return '#f39c12';
-            case 'INFECTED': return '#e74c3c';
-            case 'DECEASED': return '#7f8c8d';
-            default: return '#95a5a6';
+   function handleTab(tab: NavTab, index: number) {
+        setActiveTab(index);
+        if (tab.route) {
+            navigation.navigate(tab.route);
         }
+    }
+
+    const getSemiTransparent = (color: string, opacity: number = 0.75) => {
+        const hex = color.replace('#', '');
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+        return `rgba(${r}, ${g}, ${b}, ${opacity})`;
     };
-
-    const getDangerColor = (danger: string) => {
-        switch(danger) {
-            case 'LOW': return '#2ecc71';
-            case 'MEDIUM': return '#f39c12';
-            case 'HIGH': return '#e67e22';
-            case 'CRITICAL': return '#e74c3c';
-            default: return '#95a5a6';
-        }
-    };
-
-    const renderMissions = () => (
-        <View style={styles.sectionContainer}>
-            <Text style={styles.sectionTitle}>📋 ACTIVE MISSIONS</Text>
-            <Text style={styles.sectionSubtitle}>Priority objectives for survival</Text>
-            {missions.map((mission) => (
-                <TouchableOpacity key={mission.id} style={styles.missionCard} onPress={() => {
-                    Alert.alert(
-                        `MISSION: ${mission.title}`,
-                        `${mission.description}\n\n📍 Location: ${mission.location}\n🎁 Reward: ${mission.reward}\n⚠️ Danger Level: ${mission.danger}`,
-                        [{ text: 'ACCEPT MISSION', style: 'default' }, { text: 'CANCEL', style: 'cancel' }]
-                    );
-                }}>
-                    <View style={styles.missionHeader}>
-                        <Text style={styles.missionTitle}>{mission.title}</Text>
-                        <Text style={[styles.dangerBadge, { backgroundColor: getDangerColor(mission.danger) }]}>
-                            {mission.danger}
-                        </Text>
-                    </View>
-                    <Text style={styles.missionDescription}>{mission.description}</Text>
-                    <View style={styles.missionFooter}>
-                        <Text style={styles.missionLocation}>📍 {mission.location}</Text>
-                        <Text style={styles.missionReward}>🎁 {mission.reward}</Text>
-                    </View>
-                </TouchableOpacity>
-            ))}
-        </View>
-    );
-
-    const renderSurvivors = () => (
-        <View style={styles.sectionContainer}>
-            <Text style={styles.sectionTitle}>👥 SURVIVOR NETWORK</Text>
-            <Text style={styles.sectionSubtitle}>Last known transmissions</Text>
-            {survivors.map((survivor) => (
-                <View key={survivor.id} style={styles.survivorCard}>
-                    <View style={styles.survivorHeader}>
-                        <View style={[styles.statusDot, { backgroundColor: getStatusColor(survivor.status) }]} />
-                        <Text style={styles.survivorName}>{survivor.name}</Text>
-                        <Text style={[styles.survivorStatus, { color: getStatusColor(survivor.status) }]}>
-                            [{survivor.status}]
-                        </Text>
-                    </View>
-                    <Text style={styles.survivorMessage}>"{survivor.message}"</Text>
-                    <Text style={styles.survivorMeta}>🕒 Last seen: {survivor.lastSeen}</Text>
-                    <TouchableOpacity style={styles.commButton}>
-                        <Text style={styles.commButtonText}>📡 SEND TRANSMISSION</Text>
-                    </TouchableOpacity>
-                </View>
-            ))}
-        </View>
-    );
-
-    const renderUmbrellaFiles = () => (
-        <View style={styles.sectionContainer}>
-            <Text style={styles.sectionTitle}>🏢 UMBRELLA CORP. ARCHIVES</Text>
-            <Text style={styles.sectionSubtitle}>Classified documents - Clearance Level: OMEGA</Text>
-            {umbrellaFiles.map((file) => (
-                <TouchableOpacity key={file.id} style={styles.fileCard} onPress={() => {
-                    Alert.alert(
-                        `🔒 FILE: ${file.codeName}`,
-                        `Subject: ${file.subject}\nClearance: ${file.clearance}\nDate: ${file.date}\n\n[CONTENT REDACTED - HIGHER CLEARANCE REQUIRED]`,
-                        [{ text: 'REQUEST ACCESS', style: 'default' }, { text: 'CLOSE', style: 'cancel' }]
-                    );
-                }}>
-                    <View style={styles.fileHeader}>
-                        <Text style={styles.fileCode}>#{file.codeName}</Text>
-                        <Text style={[styles.clearanceBadge, 
-                            file.clearance === 'EYES ONLY' ? styles.eyesOnly : 
-                            file.clearance === 'TOP SECRET' ? styles.topSecret : styles.classified
-                        ]}>
-                            {file.clearance}
-                        </Text>
-                    </View>
-                    <Text style={styles.fileSubject}>{file.subject}</Text>
-                    <Text style={styles.fileDate}>📅 {file.date}</Text>
-                </TouchableOpacity>
-            ))}
-        </View>
-    );
-
-    const renderMap = () => (
-        <View style={styles.sectionContainer}>
-            <Text style={styles.sectionTitle}>🗺️ RACCOON CITY MAP</Text>
-            <Text style={styles.sectionSubtitle}>Quarantine zone overlay - Real-time threats</Text>
-            
-            <View style={styles.mapContainer}>
-                <View style={styles.mapGrid}>
-                    {['R.P.D.', 'Hospital', 'Clock Tower', 'Sewers', 'Lab', 'Cemetery'].map((zone, index) => (
-                        <TouchableOpacity key={index} style={styles.mapZone} onPress={() => {
-                            Alert.alert(
-                                `📍 ZONE: ${zone}`,
-                                `Threat Level: ${['MEDIUM', 'HIGH', 'MEDIUM', 'LOW', 'CRITICAL', 'LOW'][index]}\nSurvivors: ${[3, 1, 2, 0, 0, 1][index]}\nSafe Zone: ${index === 0 ? 'YES' : 'NO'}`,
-                                [{ text: 'ACKNOWLEDGED', style: 'default' }]
-                            );
-                        }}>
-                            <Text style={styles.mapZoneName}>{zone}</Text>
-                            <Text style={[styles.mapZoneThreat, 
-                                { color: ['#f39c12', '#e74c3c', '#f39c12', '#2ecc71', '#e74c3c', '#2ecc71'][index] }
-                            ]}>
-                                {['⚠️', '🔴', '⚠️', '🟢', '🔴', '🟢'][index]}
-                            </Text>
-                        </TouchableOpacity>
-                    ))}
-                </View>
-                <Text style={styles.mapLegend}>🟢 Safe | ⚠️ Caution | 🔴 Danger | 💀 Extreme</Text>
-            </View>
-        </View>
-    );
-
-    const scanlineTranslate = scanlinePosition.interpolate({
-        inputRange: [0, 1],
-        outputRange: [-1000, 1000]
-    });
 
     return (
-        <View style={styles.container}>
-            <View style={styles.backgroundOverlay} />
-            
-            <Animated.View style={[styles.scanline, { transform: [{ translateY: scanlineTranslate }] }]} />
-            
-            <Animated.View style={[styles.glitchOverlay, { opacity: glitchIntensity }]} />
+        <View style={styles.root}>
 
-            <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-                <View style={styles.header}>
-                    <Text style={styles.terminalHeader}>[R.P.D. EMERGENCY TERMINAL v.1.3.7]</Text>
-                    <Text style={styles.quarantineWarning}>⚠️ QUARANTINE ZONE ACTIVE ⚠️</Text>
+            <Animated.View style={[styles.leftPanel, { backgroundColor: character.accent }]}>
+
+                <Text style={[styles.watermarkGame, { color: getSemiTransparent(character.accentLight, 0.6) }]}>{character.game}</Text>
+
+                <View style={[styles.gameBadge, { borderColor: character.accentLight }]}>
+                    <Text style={[styles.gameBadgeText, { color: character.accentLight }]}>
+                        {character.game.split('/')[0].trim()}
+                    </Text>
                 </View>
 
-                <View style={styles.systemStatus}>
-                    <Text style={styles.systemText}>> SURVIVOR STATUS: CONNECTED</Text>
-                    <Text style={styles.systemText}>> LAST LOGIN: 3 HOURS AGO</Text>
-                    <Text style={styles.systemText}>> T-VIRUS DETECTION: NEGATIVE ✓</Text>
-                </View>
+                <Animated.View
+                    style={[
+                        styles.charWrapper,
+                        {
+                            transform: [
+                                { translateX: charXAnim },
+                                { translateY: floatAnim },
+                            ],
+                        },
+                    ]}
+                >
+                    <Image source={character.image} style={styles.charImage} /> 
+                </Animated.View>
 
-                <View style={styles.comLink}>
-                    <Text style={styles.comLinkTitle}>📡 COM LINK ACTIVE</Text>
-                    <View style={styles.signalBar}>
-                        <View style={[styles.signalFill, { width: '67%' }]} />
-                    </View>
-                    <Text style={styles.signalText}>SIGNAL STRENGTH: 67%</Text>
-                </View>
+                 <TouchableOpacity
+                    style={styles.arrowLeft}
+                    onPress={goPrev}
+                    activeOpacity={0.6}
+                    hitSlop={{ top: 12, bottom: 12, left: 8, right: 8 }}
+                >
+                    <Text style={[styles.arrowText, { color: character.accentLight }]}>‹</Text>
+                </TouchableOpacity>
 
-                <View style={styles.terminalWindow}>
-                    {terminalLines.map((line, index) => (
-                        <Text key={index} style={styles.terminalLine}>{line}</Text>
-                    ))}
-                </View>
+                <TouchableOpacity
+                    style={styles.arrowRight}
+                    onPress={goNext}
+                    activeOpacity={0.6}
+                    hitSlop={{ top: 12, bottom: 12, left: 8, right: 8 }}
+                >
+                    <Text style={[styles.arrowText, { color: character.accentLight }]}>›</Text>
+                </TouchableOpacity>
+            </Animated.View>
 
-                <View style={styles.tabBar}>
-                    {(['missions', 'survivors', 'files', 'map'] as const).map((tab) => (
-                        <TouchableOpacity 
-                            key={tab}
-                            style={[styles.tabButton, selectedTab === tab && styles.activeTab]}
-                            onPress={() => setSelectedTab(tab)}
+            <View style={styles.diagonalOverlay} pointerEvents="none" />
+
+            <View style={styles.rightPanel}>
+                <View style={styles.topNav}>
+                    {NAV_TABS.map((tab, i) => (
+                        <TouchableOpacity
+                            key={tab.label}
+                            onPress={() => handleTab(tab, i)}
+                            activeOpacity={0.7}
                         >
-                            <Text style={[styles.tabText, selectedTab === tab && styles.activeTabText]}>
-                                {tab === 'missions' && '📋 MISSIONS'}
-                                {tab === 'survivors' && '👥 SURVIVORS'}
-                                {tab === 'files' && '🏢 UMBRELLA FILES'}
-                                {tab === 'map' && '🗺️ MAP'}
+                            <Text
+                                style={[
+                                    styles.navItem,
+                                    activeTab === i && styles.navItemActive,
+                                ]}
+                            >
+                                {tab.label}
                             </Text>
                         </TouchableOpacity>
                     ))}
                 </View>
 
-                {selectedTab === 'missions' && renderMissions()}
-                {selectedTab === 'survivors' && renderSurvivors()}
-                {selectedTab === 'files' && renderUmbrellaFiles()}
-                {selectedTab === 'map' && renderMap()}
+                <Animated.View
+                    style={{
+                        opacity: fadeAnim,
+                        transform: [{ translateY: slideAnim }],
+                        flex: 1,
+                        justifyContent: 'center',
+                    }}
+                >
+                    <Text style={styles.firstName}>{character.firstName}</Text>
+                    <Text style={[styles.lastName, { color: character.accent }]}>
+                        {character.lastName}
+                    </Text>
 
-                <View style={styles.threatAlert}>
-                    <Text style={styles.threatTitle}>🧟 ACTIVE THREAT ALERT 🧟</Text>
-                    <Text style={styles.threatMessage}>"{activeThreat.message}"</Text>
-                    <Text style={styles.threatMeta}>- {activeThreat.sender} • {activeThreat.timestamp}</Text>
-                    <View style={[styles.severityBadge, 
-                        activeThreat.severity === 'HIGH' && styles.highSeverity
-                    ]}>
-                        <Text style={styles.severityText}>SEVERITY: {activeThreat.severity}</Text>
+                    <View style={[styles.divider, { backgroundColor: character.accentLight }]} />
+
+                    <Text style={styles.roleText}>{character.role}</Text>
+
+                    <View style={styles.statusRow}>
+                        <View style={[styles.statusDot, { backgroundColor: STATUS_COLORS[character.status] }]} />
+                        <Text style={[styles.statusText, { color: STATUS_COLORS[character.status] }]}>
+                            {character.status}
+                        </Text>
                     </View>
-                </View>
 
-                <View style={styles.footer}>
-                    <View style={styles.systemBar}>
-                        <Text style={styles.footerText}> SYSTEM STATUS: [████████░░] 80%</Text>
+                    <Text style={styles.aboutLabel}>ABOUT</Text>
+                    <Text style={styles.aboutText}>{character.about}</Text>
+
+                    <TouchableOpacity
+                        style={[styles.startBtn, { backgroundColor: character.accent }]}
+                        activeOpacity={0.85}
+                        onPress={() => navigation.navigate('GameSummaries')}
+                    >
+                        <Text style={styles.startBtnText}>▶  EXPLORE LORE</Text>
+                    </TouchableOpacity>
+
+                    <View style={styles.dotsRow}>
+                        {CHARACTERS.map((_, i) => (
+                            <TouchableOpacity
+                                key={i}
+                                style={styles.dotWrapper}
+                                onPress={() => goTo(i)}
+                                activeOpacity={0.7}
+                            >
+                                <View
+                                    style={[
+                                        styles.dot,
+                                        i === charIndex && [
+                                            styles.dotActive,
+                                            { backgroundColor: character.accent },
+                                        ],
+                                    ]}
+                                />
+                            </TouchableOpacity>
+                        ))}
                     </View>
-                    <Text style={styles.footerText}> BATTERY: 2h 43m remaining</Text>
-                    <Text style={styles.footerWarning}>⚠️ DO NOT LEAVE SAFE ZONE UNARMED ⚠️</Text>
-                </View>
+                </Animated.View>
+            </View>
 
-                <TouchableOpacity style={styles.logoutButton} onPress={() => {
-                    Alert.alert(
-                        '⚠️ EMERGENCY LOGOUT ⚠️',
-                        'Are you sure you want to disconnect from the R.P.D. network?',
-                        [
-                            { text: 'CANCEL', style: 'cancel' },
-                            { text: 'DISCONNECT', style: 'destructive', onPress: () => navigation.replace('Login') }
-                        ]
-                    );
-                }}>
-                    <Text style={styles.logoutText}>🔌 DISCONNECT FROM NETWORK</Text>
-                </TouchableOpacity>
-            </ScrollView>
+            <View style={styles.franchiseFooter} pointerEvents="none">
+                <Text style={styles.franchiseText}>RESIDENT EVIL</Text>
+                <Text style={styles.franchiseSubText}>ARCHIVE HUB • SECURITY LEVEL OMEGA</Text>
+            </View>
         </View>
     );
 }

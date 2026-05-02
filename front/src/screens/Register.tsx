@@ -23,7 +23,7 @@ export default function Register() {
     else Alert.alert("Erro no registro", "Verifique suas informações e tente novamente.");
   };
 
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
 
   const irParaRegistro = () => {
     navigation.navigate('Login'); // nome da tela
